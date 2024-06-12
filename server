@@ -1,0 +1,73 @@
+#······························ ServerTCP ··············································
+import socket
+import threading
+import time
+def handle_connection(conn):
+# Read incoming data
+    last_values = []
+    received_n = 0
+
+
+    while True:
+        try:
+            data = conn.recv(25)
+            if not data:
+                print("Connection closed")
+                print(f"Received: {received_n}")
+                break
+           
+            message = data.decode()
+            print(message)
+
+
+            parts = message.split(",")
+
+
+            received_n += 1
+
+
+            # Parse ID and timestamp
+            try:
+                timestamp = int(parts[1])
+            except ValueError:
+                print("Invalid ID or timestamp:", parts)
+                continue
+
+
+            latency = time.time_ns() - timestamp
+            last_values.append(int(latency/1000000))
+            print(f"Avg Latency: {sum(last_values)/received_n}")
+
+
+        except Exception as e:
+            print("Error:", e)
+            break
+
+
+    conn.close()
+
+
+PORT = 9595
+def main():
+    # Listen for incoming connections on port 8085
+    server_address = ('', PORT)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        try:
+            server_socket.bind(server_address)
+            server_socket.listen(5)
+            print(f"Listening for connections on port {PORT}...")
+
+
+            while True:
+                conn, addr = server_socket.accept()
+                print(f"Connected by {addr}")
+                threading.Thread(target=handle_connection, args=(conn,), daemon=True).start()
+
+
+        except Exception as e:
+            print("Error:", e)
+
+
+if __name__ == "__main__":
+    main()
+

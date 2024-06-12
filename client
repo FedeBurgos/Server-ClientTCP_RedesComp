@@ -1,0 +1,36 @@
+#·································ClienteTCP ·············································
+import socket
+import time
+import argparse
+
+
+def main():
+    parser = argparse.ArgumentParser(description='TCP client for sending messages')
+    parser.add_argument('--len', type=int, default=100, help='Number of messages to send')
+    parser.add_argument('--timeout', type=int, default=500, help='Timeout in milliseconds')
+    args = parser.parse_args()
+
+
+    # Connect to the server
+    server_address = ('176079531cc0e9f551d2a5adb468e3f0.serveo.net', 8085)
+    conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+       conn.connect(server_address)
+
+
+       sim_len = args.len
+       timeout_ms = args.timeout / 1000
+
+
+       for i in range(sim_len):
+           timestamp = int(time.time() * 1000000000)
+           message = f"{1000+i},{timestamp}\n"
+           a = message.encode()
+           conn.sendall(a)
+           time.sleep(timeout_ms)
+    except Exception as e:
+         print(e)
+    finally:
+         conn.close()
+#if _name_ == "_main_":
+#    main()
